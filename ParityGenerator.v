@@ -1,6 +1,6 @@
 module ParityGenerator(
   input wire [15:0] a_i,
-  output reg [15:0] parity_o
+  output reg parity_o
 );
   always @(*) begin
     parity_o = a_i[0] ^ a_i[1] ^ a_i[2] ^ a_i[3] ^ 
