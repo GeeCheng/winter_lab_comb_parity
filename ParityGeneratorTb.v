@@ -4,7 +4,7 @@
 module ParityGeneratorTb;
 
   reg [15:0] a_i;
-  wire [15:0] parity_o;
+  wire parity_o;
 
   ParityGenerator parity_generator(
     .a_i      (a_i     ),
@@ -15,6 +15,7 @@ module ParityGeneratorTb;
   integer expected = 0;
   integer status = 0;
   integer error = 0;
+  
   initial begin
     $dumpfile("ParityGeneratorTb.vcd");
     $dumpvars(0, ParityGeneratorTb);
