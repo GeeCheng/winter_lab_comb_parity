@@ -30,8 +30,8 @@ module ParityGeneratorTb;
     for (integer i = 16'b0000000000000000; i <= 16'b1111111111111111; i = i + 1) begin
       a_i = i;
       status = $fscanf(file, "%d", expected);
+      #10;
       if (status == 1) begin
-        #1;
         if (parity_o !== expected) begin
           $display("Error: parity_o = %d, expected = %d", parity_o, expected);
           error = error + 1;
@@ -41,7 +41,6 @@ module ParityGeneratorTb;
         $display("Error: unexpected status %d", status);
         $finish;
       end
-      #1;
     end
 
     if (error == 0) begin
