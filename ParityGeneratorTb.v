@@ -3,53 +3,84 @@
 
 module ParityGeneratorTb;
 
-  reg [15:0] a_i;
-  wire parity_o;
+  /////////////////////////
+  // Signal Declarations //
+  /////////////////////////
+  reg  [15:0] a_i;
+  reg         clk_i;
+  wire        parity_o;
 
-  ParityGenerator parity_generator(
+  ///////////////////////
+  // DUT Instantiation //
+  ///////////////////////
+  ParityGenerator u_ParityGenerator (
     .a_i      (a_i     ),
     .parity_o (parity_o)
   );
 
-  integer file = 0;
-  integer expected = 0;
-  integer status = 0;
-  integer error = 0;
-  
+  ////////////////////////////
+  // Variables for File I/O //
+  ////////////////////////////
+  integer file;
+  integer expected;
+  integer status;
+  integer error_count;
+
+  //////////////////////
+  // Clock Generation //
+  //////////////////////
+  initial clk_i = 0;
+  always #5 clk_i = ~clk_i; // 10ns clock period
+
+
+  ////////////////////////
+  // Main Test Sequence //
+  ////////////////////////
   initial begin
+
+    ///////////////////////////////////////////
+    // Open answer file and check for errors //
+    ///////////////////////////////////////////
     $dumpfile("ParityGeneratorTb.vcd");
     $dumpvars(0, ParityGeneratorTb);
 
     file = $fopen("answer.txt", "r");
-
     if (file == 0) begin
-      $display("Error: could not open ParityGeneratorTb.txt");
+      $display("[ERROR] Could not open answer.txt");
       $finish;
     end
 
-    for (integer i = 16'b0000000000000000; i <= 16'b1111111111111111; i = i + 1) begin
+    error_count = 0;
+
+    ///////////////////
+    // Test Sequence //
+    ///////////////////
+    for (integer i = 0; i <= 16'b1111_1111_1111_1111; i = i + 1) begin
       a_i = i;
       status = $fscanf(file, "%d", expected);
-      #10;
+      @(posedge clk_i);
       if (status == 1) begin
         if (parity_o !== expected) begin
-          $display("Error: parity_o = %d, expected = %d", parity_o, expected);
-          error = error + 1;
-          $finish;
+          $display("[FAIL] Input: %b, parity_o = %b, expected = %b", a_i, parity_o, expected);
+          error_count = error_count + 1;
         end
       end else begin
-        $display("Error: unexpected status %d", status);
+        $display("[ERROR] Unexpected file read status: %d", status);
         $finish;
       end
     end
 
-    if (error == 0) begin
-      $display("Success: all tests passed");
+    //////////////////
+    // Test Summary //
+    //////////////////
+    if (error_count == 0) begin
+      $display("[SUCCESS] All tests passed");
     end else begin
-      $display("Error: %d tests failed", error);
+      $display("[FAILURE] %d tests failed", error_count);
     end
 
-  $finish;
+    $fclose(file);
+    $finish;
   end
 
 endmodule
